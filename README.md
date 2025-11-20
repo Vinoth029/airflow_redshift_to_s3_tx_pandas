@@ -217,15 +217,3 @@ This Airflow DAG demonstrates how to:
 * Use XCom safely by converting DF → JSON → DF
 
 This approach is perfect for ETL/ELT pipelines, ML feature extraction, analytics jobs, and data validation workflows.
-
----
-
-If you want, I can also create:
-
-✅ Version using S3Hook instead of boto3
-
-✅ Version with partitioned folder outputs like `dt={{ ds }}`
-
-✅ Serverless Redshift version
-
-Just tell me!

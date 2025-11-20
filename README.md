@@ -146,5 +146,86 @@ with DAG(
     fetch_dataframe = PythonOperator(
         task_id="fetch_dataframe",
         python_callable=fetch_dataframe,
-        provide
+        provide_context=True,
+    )
+
+    transform_dataframe = PythonOperator(
+        task_id="transform_dataframe",
+        python_callable=transform_dataframe,
+        provide_context=True,
+    )
+
+    write_s3 = PythonOperator(
+        task_id="write_to_s3",
+        python_callable=write_to_s3,
+        provide_context=True,
+    )
+
+    fetch_dataframe >> transform_dataframe >> write_s3
 ```
+
+---
+
+# 🧪 **3. Example Input → Output Walkthrough**
+
+## **Input Data in Redshift (Example)**
+
+| order_id | customer_id | amount | order_ts         |
+| -------- | ----------- | ------ | ---------------- |
+| 101      | 5001        | 100.00 | 2025-01-01 10:00 |
+| 102      | 5002        | 200.00 | 2025-01-01 11:00 |
+
+---
+
+# ✔ After Transformation Step
+
+| order_id | amount | amount_with_tax | order_date |
+| -------- | ------ | --------------- | ---------- |
+| 101      | 100    | 110.00          | 2025-01-01 |
+| 102      | 200    | 220.00          | 2025-01-01 |
+
+---
+
+# 📁 **Files Created in S3**
+
+```
+my-output-bucket
+ └── analytics/orders_output/
+      ├── orders.parquet
+      ├── orders.csv
+      └── orders.json
+```
+
+### JSON Example:
+
+```json
+[
+  {"order_id":101,"customer_id":5001,"amount":100,"amount_with_tax":110,"order_date":"2025-01-01"},
+  {"order_id":102,"customer_id":5002,"amount":200,"amount_with_tax":220,"order_date":"2025-01-01"}
+]
+```
+
+---
+
+# 🎉 **Pipeline Summary**
+
+This Airflow DAG demonstrates how to:
+
+* Run SQL on Redshift and fetch results into a Pandas DataFrame
+* Transform the DataFrame in Python
+* Persist the output to S3 in **Parquet**, **CSV**, and **JSON** formats
+* Use XCom safely by converting DF → JSON → DF
+
+This approach is perfect for ETL/ELT pipelines, ML feature extraction, analytics jobs, and data validation workflows.
+
+---
+
+If you want, I can also create:
+
+✅ Version using S3Hook instead of boto3
+
+✅ Version with partitioned folder outputs like `dt={{ ds }}`
+
+✅ Serverless Redshift version
+
+Just tell me!
